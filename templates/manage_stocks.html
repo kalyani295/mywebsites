@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Stock List{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stock-form {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .stock-form input[type="text"] {
+        padding: 8px;
+        width: 200px;
+        margin-right: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .stock-form button {
+        padding: 8px 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 5px;
+        transition: background-color 0.3s;
+    }
+    .stock-form button:hover {
+        opacity: 0.9;
+    }
+    .stock-form button[name="action"][value="remove"] {
+        background-color: #f44336;
+    }
+    .stock-list {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-top: 20px;
+    }
+    .stock-list ul {
+        list-style-type: none;
+        padding: 0;
+        column-count: 3;
+        column-gap: 20px;
+    }
+    .stock-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+        break-inside: avoid;
+    }
+    .toggle-btn {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #2196F3;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        margin: 10px 0;
+        transition: background-color 0.3s;
+    }
+    .toggle-btn:hover {
+        background-color: #0b7dda;
+        text-decoration: none;
+    }
+    .note {
+        color: #666;
+        font-size: 0.9em;
+        margin-top: 10px;
+    }
+    @media (max-width: 768px) {
+        .stock-list ul {
+            column-count: 2;
+        }
+    }
+    @media (max-width: 480px) {
+        .stock-list ul {
+            column-count: 1;
+        }
+        .stock-form input[type="text"] {
+            width: 100%;
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+        .stock-form button {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Manage Stock List</h1>
+
+    <div class="stock-form">
+        <form action="{{ url_for('manage_stocks') }}" method="post">
+            <input type="text" name="stock" placeholder="Enter stock symbol (e.g. RELIANCE)" required>
+            <button type="submit" name="action" value="add">Add Stock</button>
+            <button type="submit" name="action" value="remove">Remove Stock</button>
+            <p class="note">Note: ".NS" will be automatically added for NSE stocks</p>
+        </form>
+    </div>
+
+    <a href="{{ url_for('manage_stocks', show='true' if not show_list else 'false') }}" class="toggle-btn">
+        {% if show_list %}Hide Stock List{% else %}Show Stock List{% endif %}
+    </a>
+
+    {% if show_list %}
+    <div class="stock-list">
+        <h2>Current Stock List ({{ stock_list|length }} stocks)</h2>
+        <ul>
+            {% for stock in stock_list|sort %}
+            <li>{{ stock }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

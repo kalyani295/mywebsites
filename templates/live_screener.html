@@ -1,0 +1,393 @@
+[file name]: live_screener.html
+[file content begin]
+{% extends "base.html" %}
+
+{% block title %}Live Stock Screener{% endblock %}
+
+{% block extra_css %}
+<style>
+    h1 { 
+        text-align: center; 
+        margin: 20px 0;
+        color: #2c3e50;
+    }
+    table { 
+        width: 95%;
+        margin: 20px auto; 
+        border-collapse: collapse;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    th, td { 
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        text-align: right;
+    }
+    th { 
+        background-color: #333; 
+        color: white; 
+        text-align: center;
+        position: sticky;
+        top: 0;
+    }
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    .bullish { 
+        background-color: rgba(144, 238, 144, 0.3) !important;
+    }
+    .bearish { 
+        background-color: rgba(240, 128, 128, 0.3) !important;
+    }
+    .neutral { 
+        background-color: rgba(211, 211, 211, 0.3) !important;
+    }
+    .stock-name {
+        text-align: left;
+        font-weight: bold;
+    }
+    .timeframe-selector { 
+        margin: 20px auto; 
+        padding: 15px;
+        background-color: #f5f5f5;
+        width: 60%;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .market-status {
+        text-align: center;
+        margin: 10px 0;
+        font-weight: bold;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .market-open {
+        background-color: #dff0d8;
+        color: #3c763d;
+    }
+    .market-closed {
+        background-color: #f2dede;
+        color: #a94442;
+    }
+    .refresh-info {
+        text-align: center;
+        margin: 10px 0;
+        font-size: 0.9em;
+        color: #666;
+    }
+    .live-indicator {
+        color: #d35400;
+        font-weight: bold;
+    }
+    .trend-section {
+        margin-bottom: 30px;
+    }
+    .trend-title {
+        text-align: center;
+        color: #333;
+        margin: 20px 0 10px;
+        font-size: 1.4em;
+    }
+    .price-up {
+        color: green;
+    }
+    .price-down {
+        color: red;
+    }
+    .stock-name a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .stock-name a:hover {
+        text-decoration: underline;
+        color: #0066cc;
+    }
+    @media (max-width: 768px) {
+        .timeframe-selector {
+            width: 90%;
+        }
+        table {
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 8px 6px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h1>Live Stock Screener <span class="live-indicator">(Live Updates)</span></h1>
+    
+    <div class="refresh-info">
+        Last update: <span id="last-refresh-time">{{ current_time }}</span> IST
+        <div id="refresh-status">Auto-refreshing every 30 seconds</div>
+        <div class="live-indicator">Showing most recent market data (including current candle)</div>
+    </div>
+    
+    <div id="market-status" class="market-status {% if market_open %}market-open{% else %}market-closed{% endif %}">
+        {% if market_open %}
+            Market Open (9:15 AM - 3:30 PM IST)
+        {% else %}
+            Market Closed
+        {% endif %}
+    </div>
+
+    <div class="timeframe-selector">
+        <strong>Timeframe: </strong>
+        <a href="/live_screener?timeframe=5m">5m</a> | 
+        <a href="/live_screener?timeframe=15m">15m</a> | 
+        <a href="/live_screener?timeframe=1h">1h</a>
+        <span>(Current: {{ current_timeframe }})</span>
+    </div>
+
+    <!-- Bullish Stocks Section -->
+    <div class="trend-section">
+        <h2 class="trend-title">Bullish Stocks</h2>
+        <table>
+            <tr>
+                <th>Stock</th>
+                <th>Open</th>
+                <th>Close</th>
+                <th>EMA 9</th>
+                <th>EMA 20</th>
+                <th>RSI 14</th>
+                <th>Trend</th>
+            </tr>
+            {% for stock in stocks if stock.trend == "Bullish" %}
+            <tr class="bullish">
+                <td class="stock-name">
+
+<a href="{{ stock.chart_url }}" target="_blank" rel="noopener noreferrer" title="Open {{ stock.symbol }} in TradingView">
+
+                        {{ stock.symbol }}
+                    </a>
+                </td>
+                <td>{{ stock.open }}</td>
+                <td class="{% if stock.close > stock.open %}price-up{% else %}price-down{% endif %}">
+                    {{ stock.close }}
+                </td>
+                <td>{{ stock.ema9|round(2) }}</td>
+                <td>{{ stock.ema20|round(2) }}</td>
+                <td>{{ stock.rsi|round(2) }}</td>
+                <td>{{ stock.trend }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center;">No bullish stocks found</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Bearish Stocks Section -->
+    <div class="trend-section">
+        <h2 class="trend-title">Bearish Stocks</h2>
+        <table>
+            <tr>
+                <th>Stock</th>
+                <th>Open</th>
+                <th>Close</th>
+                <th>EMA 9</th>
+                <th>EMA 20</th>
+                <th>RSI 14</th>
+                <th>Trend</th>
+            </tr>
+            {% for stock in stocks if stock.trend == "Bearish" %}
+            <tr class="bearish">
+                <td class="stock-name">
+<a href="{{ stock.chart_url }}" target="_blank" rel="noopener noreferrer" title="Open {{ stock.symbol }} in TradingView">                  
+
+
+                        {{ stock.symbol }}
+                    </a>
+                </td>
+                <td>{{ stock.open }}</td>
+                <td class="{% if stock.close > stock.open %}price-up{% else %}price-down{% endif %}">
+                    {{ stock.close }}
+                </td>
+                <td>{{ stock.ema9|round(2) }}</td>
+                <td>{{ stock.ema20|round(2) }}</td>
+                <td>{{ stock.rsi|round(2) }}</td>
+                <td>{{ stock.trend }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center;">No bearish stocks found</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Neutral Stocks Section -->
+    <div class="trend-section">
+        <h2 class="trend-title">Neutral Stocks</h2>
+        <table>
+            <tr>
+                <th>Stock</th>
+                <th>Open</th>
+                <th>Close</th>
+                <th>EMA 9</th>
+                <th>EMA 20</th>
+                <th>RSI 14</th>
+                <th>Trend</th>
+            </tr>
+            {% for stock in stocks if stock.trend == "Neutral" %}
+            <tr class="neutral">
+                <td class="stock-name">
+<a href="{{ stock.chart_url }}" target="_blank" rel="noopener noreferrer" title="Open {{ stock.symbol }} in TradingView">                    
+
+                        {{ stock.symbol }}
+                    </a>
+                </td>
+                <td>{{ stock.open }}</td>
+                <td class="{% if stock.close > stock.open %}price-up{% else %}price-down{% endif %}">
+                    {{ stock.close }}
+                </td>
+                <td>{{ stock.ema9|round(2) }}</td>
+                <td>{{ stock.ema20|round(2) }}</td>
+                <td>{{ stock.rsi|round(2) }}</td>
+                <td>{{ stock.trend }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center;">No neutral stocks found</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let cachedHolidays = [];
+            const holidayNames = {
+                '2025-02-26': 'Mahashivratri',
+                '2025-03-14': 'Holi',
+                '2025-03-31': 'Id-Ul-Fitr',
+                '2025-04-10': 'Shri Mahavir Jayanti',
+                '2025-04-14': 'Dr. Baba Saheb Ambedkar Jayanti',
+                '2025-04-18': 'Good Friday',
+                '2025-05-01': 'Maharashtra Day',
+                '2025-08-15': 'Independence Day',
+                '2025-08-27': 'Shri Ganesh Chaturthi',
+                '2025-10-02': 'Mahatma Gandhi Jayanti',
+                '2025-10-21': 'Diwali Laxmi Pujan',
+                '2025-10-22': 'Balipratipada',
+                '2025-11-05': 'Guru Nanak Jayanti',
+                '2025-12-25': 'Christmas'
+            };
+
+            async function fetchHolidays() {
+                try {
+                    const response = await fetch('/api/holidays');
+                    if (!response.ok) throw new Error('Failed to fetch holidays');
+                    cachedHolidays = await response.json();
+                } catch (error) {
+                    console.error('Error fetching holidays:', error);
+                    cachedHolidays = Object.keys(holidayNames);
+                }
+            }
+
+            function isTradingDay(date) {
+                const day = date.getUTCDay();
+                if (day === 0 || day === 6) return false;
+                
+                const dateStr = date.toISOString().split('T')[0];
+                return !cachedHolidays.includes(dateStr);
+            }
+
+            function getHolidayName(dateStr) {
+                return holidayNames[dateStr] || 'Holiday';
+            }
+
+            function isMarketOpen() {
+                const now = new Date();
+                const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+                
+                if (!isTradingDay(istTime)) return false;
+                
+                const hours = istTime.getUTCHours();
+                const minutes = istTime.getUTCMinutes();
+                
+                return (hours > 9 || (hours === 9 && minutes >= 15)) && 
+                       (hours < 15 || (hours === 15 && minutes <= 30));
+            }
+
+            function updateMarketStatus() {
+                const now = new Date();
+                const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+                const dateStr = istTime.toISOString().split('T')[0];
+                const statusElement = document.getElementById('market-status');
+                
+                if (!isTradingDay(istTime)) {
+                    if (cachedHolidays.includes(dateStr)) {
+                        statusElement.textContent = `Market Closed (${getHolidayName(dateStr)})`;
+                    } else {
+                        statusElement.textContent = 'Market Closed (Weekend)';
+                    }
+                    statusElement.className = 'market-status market-closed';
+                } else {
+                    const hours = istTime.getUTCHours();
+                    const minutes = istTime.getUTCMinutes();
+                    
+                    if (hours < 9 || (hours === 9 && minutes < 15)) {
+                        statusElement.textContent = 'Market Closed (Opens at 9:15 AM IST)';
+                        statusElement.className = 'market-status market-closed';
+                    } else if (hours > 15 || (hours === 15 && minutes > 30)) {
+                        statusElement.textContent = 'Market Closed for the Day';
+                        statusElement.className = 'market-status market-closed';
+                    } else {
+                        statusElement.textContent = 'Market Open (9:15 AM - 3:30 PM IST)';
+                        statusElement.className = 'market-status market-open';
+                    }
+                }
+            }
+
+            function updateLastRefreshTime() {
+                const now = new Date();
+                const options = { 
+                    timeZone: 'Asia/Kolkata',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                };
+                document.getElementById('last-refresh-time').textContent = 
+                    now.toLocaleTimeString('en-IN', options);
+            }
+
+            // Auto-refresh only when market is open
+            function setupAutoRefresh() {
+                if (isMarketOpen()) {
+                    // Update countdown display
+                    let seconds = 30;
+                    const countdown = setInterval(() => {
+                        seconds--;
+                        document.getElementById('refresh-status').textContent = 
+                            `Auto-refreshing in ${seconds} seconds...`;
+                        if (seconds <= 0) {
+                            clearInterval(countdown);
+                            updateLastRefreshTime();
+                            window.location.reload();
+                        }
+                    }, 1000);
+                } else {
+                    document.getElementById('refresh-status').textContent = 
+                        "Auto-refresh paused (Market Closed)";
+                    // Check every minute if market has opened
+                    setTimeout(setupAutoRefresh, 60000);
+                }
+            }
+
+            // Initialize
+            fetchHolidays().then(() => {
+                updateMarketStatus();
+                updateLastRefreshTime();
+                setupAutoRefresh();
+                setInterval(updateMarketStatus, 60000);
+            });
+        });
+    </script>
+{% endblock %}
+[file content end]

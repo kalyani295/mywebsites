@@ -1,0 +1,1116 @@
+    {% extends "base.html" %}
+
+{% block title %}Create Custom Scan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .scan-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 30px;
+    }
+    
+    .scan-settings {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .setting-group {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .setting-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    
+    .setting-group select, 
+    .setting-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .conditions-container {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #f9f9f9;
+    }
+    
+    .condition-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+        align-items: center;
+    }
+    
+    .condition-row select,
+    .condition-row input {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-width: 120px;
+    }
+    
+    .condition-row .indicator-select {
+        min-width: 150px;
+    }
+    
+    .condition-row .value-input {
+        min-width: 80px;
+    }
+    
+    .add-condition-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    
+    .add-condition-btn:hover {
+        background-color: #2980b9;
+    }
+    
+    .remove-condition-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 8px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .remove-condition-btn:hover {
+        background-color: #c0392b;
+    }
+    
+    .logical-operator {
+        font-weight: bold;
+        margin: 0 10px;
+    }
+    
+    .scan-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        border: none;
+        font-weight: bold;
+    }
+    
+    .btn-primary {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #2980b9;
+    }
+    
+    .btn-success {
+        background-color: #27ae60;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background-color: #219653;
+    }
+    
+    .btn-secondary {
+        background-color: #95a5a6;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+    
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 30px;
+    }
+    
+    .results-table th, .results-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+    
+    .results-table th {
+        background-color: #333;
+        color: white;
+    }
+    
+    .results-table tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    
+    .note-box {
+        background-color: #fff8e1;
+        border-left: 4px solid #ffc107;
+        padding: 10px;
+        margin-top: 20px;
+    }
+    
+    .live-badge {
+        background-color: #e74c3c;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+    
+    .strategy-name {
+        margin-bottom: 15px;
+    }
+    
+    .strategy-name input {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 300px;
+    }
+    
+    .saved-strategies {
+        margin-top: 30px;
+    }
+    
+    .strategy-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    
+    .strategy-list li {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .strategy-list li:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .strategy-actions a {
+        margin-left: 10px;
+        color: #3498db;
+        text-decoration: none;
+    }
+    
+    .strategy-actions a:hover {
+        text-decoration: underline;
+    }
+    
+    .progress-container {
+        width: 100%;
+        background-color: #f1f1f1;
+        border-radius: 4px;
+        margin: 20px 0;
+        display: none;
+    }
+    
+    .progress-bar {
+        height: 20px;
+        background-color: #4CAF50;
+        border-radius: 4px;
+        width: 0%;
+        transition: width 0.3s;
+        text-align: center;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scan-container">
+    <h1>Create Custom Scan</h1>
+    
+    <div class="scan-settings">
+        <div class="setting-group">
+            <label for="timeframe">Timeframe</label>
+           <select id="timeframe">
+    <option value="1d">Daily</option>
+    <option value="1w">Weekly</option>
+    <option value="1mo">Monthly</option>
+    <option value="1y">Yearly</option>
+</select>
+        </div>
+        
+        <div class="setting-group">
+            <label for="segment">Stock Segment</label>
+            <select id="segment">
+                <option value="nifty50">Nifty 50</option>
+                <option value="nifty200">Nifty 200</option>
+                <option value="nifty500">Nifty 500</option>
+                <option value="smallcap">Small Cap</option>
+            </select>
+        </div>
+        
+        <div class="setting-group">
+            <label for="strategy-type">Strategy Type</label>
+            <select id="strategy-type">
+                <option value="bullish">Bullish</option>
+                <option value="bearish">Bearish</option>
+                <option value="both">Both</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="strategy-name">
+        <label for="strategy-name">Strategy Name (Optional)</label>
+        <input type="text" id="strategy-name" placeholder="Enter a name for your strategy">
+    </div>
+    
+    <div class="conditions-container">
+        <h3>Scan Conditions</h3>
+        <div id="conditions-wrapper">
+            <!-- Conditions will be added here -->
+        </div>
+        
+        <div class="logical-operator-container" style="display: none;">
+            <select class="logical-operator">
+                <option value="AND">AND</option>
+                <option value="OR">OR</option>
+            </select>
+        </div>
+        
+        <button class="add-condition-btn" id="add-condition">Add Condition</button>
+    </div>
+    
+    <div class="progress-container" id="progress-container">
+        <div class="progress-bar" id="progress-bar">0%</div>
+    </div>
+    
+    <div class="scan-actions">
+        <button class="btn btn-secondary" id="save-scan">Save Strategy</button>
+        <button class="btn btn-primary" id="test-scan">Test Strategy</button>
+        <button class="btn btn-success" id="run-scan">Run Scan</button>
+    </div>
+    
+    <table class="results-table" id="scan-results" style="display: none;">
+        <thead>
+            <tr>
+                <th>Stock</th>
+                <th>Price</th>
+                <th>RSI(14)</th>
+                <th>EMA(20)</th>
+                <th>Close</th>
+                <th>Volume</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="results-body">
+            <!-- Results will be populated here -->
+        </tbody>
+    </table>
+    
+    <div class="note-box">
+        <p>Note: Delayed data as of <span id="current-time"></span>, get <span class="live-badge">Realtime scans</span> in our premium subscription.</p>
+    </div>
+    
+    <div class="saved-strategies" id="saved-strategies" style="display: none;">
+        <h3>Your Saved Strategies</h3>
+        <ul class="strategy-list" id="strategy-list">
+            <!-- Saved strategies will be listed here -->
+        </ul>
+    </div>
+</div>
+
+<script>
+// Stock lists for different segments
+const STOCK_LISTS = {
+    nifty50: [
+        'RELIANCE.NS', 'TCS.NS', 'HDFCBANK.NS', 'ICICIBANK.NS', 'INFY.NS',
+        'HINDUNILVR.NS', 'ITC.NS', 'SBIN.NS', 'BHARTIARTL.NS', 'LICI.NS',
+        'LT.NS', 'KOTAKBANK.NS', 'AXISBANK.NS', 'ASIANPAINT.NS',
+        'MARUTI.NS', 'TITAN.NS', 'BAJFINANCE.NS', 'TATASTEEL.NS', 'POWERGRID.NS',
+        'NTPC.NS', 'ULTRACEMCO.NS', 'SUNPHARMA.NS', 'TATAMOTORS.NS', 'ADANIENT.NS',
+        'BAJAJ-AUTO.NS', 'WIPRO.NS', 'ONGC.NS', 'JSWSTEEL.NS', 'HCLTECH.NS',
+        'TATACONSUM.NS', 'NESTLEIND.NS', 'INDUSINDBK.NS', 'COALINDIA.NS', 'BPCL.NS',
+        'HDFCLIFE.NS', 'DIVISLAB.NS', 'DRREDDY.NS', 'GRASIM.NS', 'BRITANNIA.NS',
+        'ADANIPORTS.NS', 'EICHERMOT.NS', 'HDFC.NS', 'UPL.NS', 'TECHM.NS',
+        'SHREECEM.NS', 'HEROMOTOCO.NS', 'BAJAJFINSV.NS', 'CIPLA.NS', 'IOC.NS'
+    ],
+    nifty200: [
+        // Include all Nifty 50 stocks first
+        'RELIANCE.NS', 'TCS.NS', 'HDFCBANK.NS', /*... all Nifty 50 stocks ...*/,
+        // Then add Nifty Next 50 stocks
+        'ADANIPORTS.NS', 'DRREDDY.NS', 'EICHERMOT.NS', 'HDFC.NS', 'UPL.NS',
+        'TECHM.NS', 'SHREECEM.NS', 'HEROMOTOCO.NS', 'BAJAJFINSV.NS', 'CIPLA.NS',
+        'IOC.NS', 'VEDL.NS', 'GAIL.NS', 'BHARTIINFRATEL.NS', 'ZEEL.NS',
+        'HINDALCO.NS', 'JSWSTEEL.NS', 'INDUSINDBK.NS', 'TATACONSUM.NS', 'NESTLEIND.NS',
+        'COALINDIA.NS', 'BPCL.NS', 'HDFCLIFE.NS', 'DIVISLAB.NS', 'GRASIM.NS',
+        'BRITANNIA.NS', 'M&M.NS', 'TATAPOWER.NS', 'AMBUJACEM.NS', 'ACC.NS',
+        'PEL.NS', 'PIDILITIND.NS', 'BOSCHLTD.NS', 'HAVELLS.NS', 'ASHOKLEY.NS',
+        'BERGEPAINT.NS', 'DABUR.NS', 'MARICO.NS', 'SRTRANSFIN.NS', 'AUROPHARMA.NS',
+        'BIOCON.NS', 'CADILAHC.NS', 'PAGEIND.NS', 'TORNTPHARM.NS', 'GLENMARK.NS',
+        // Then add remaining Nifty 200 stocks
+        'ABB.NS', 'ACC.NS', 'AUBANK.NS', 'BANKBARODA.NS', 'BATAINDIA.NS',
+        'BEL.NS', 'BHEL.NS', 'BHARATFORG.NS', 'BOSCHLTD.NS', 'CADILAHC.NS',
+        'CANBK.NS', 'CHOLAFIN.NS', 'COLPAL.NS', 'CONCOR.NS', 'CUMMINSIND.NS',
+        'DLF.NS', 'EMAMILTD.NS', 'ESCORTS.NS', 'EXIDEIND.NS', 'FEDERALBNK.NS',
+        'GODREJCP.NS', 'GODREJPROP.NS', 'HINDPETRO.NS', 'ICICIPRULI.NS', 'IDEA.NS',
+        'IDFC.NS', 'IDFCFIRSTB.NS', 'IGL.NS', 'INDIANB.NS', 'INDIGO.NS',
+        'JINDALSTEL.NS', 'JUBLFOOD.NS', 'L&TFH.NS', 'LUPIN.NS', 'M&MFIN.NS',
+        'MANAPPURAM.NS', 'MRF.NS', 'MUTHOOTFIN.NS', 'NMDC.NS', 'OIL.NS',
+        'OFSS.NS', 'PETRONET.NS', 'PFC.NS', 'PNB.NS', 'RBLBANK.NS',
+        'SAIL.NS', 'SIEMENS.NS', 'SRF.NS', 'SUNTV.NS', 'TATACHEM.NS',
+        'TATACOMM.NS', 'TVSMOTOR.NS', 'UBL.NS', 'VOLTAS.NS', 'WOCKPHARMA.NS'
+    ],
+    nifty500: [
+        // Include all Nifty 200 first
+        'RELIANCE.NS', 'TCS.NS', /*... all Nifty 200 stocks ...*/,
+        // Then add remaining Nifty 500 stocks
+        '3MINDIA.NS', 'AARTIIND.NS', 'ABFRL.NS', 'ADANIGREEN.NS', 'ADANITRANS.NS',
+        'AIAENG.NS', 'APOLLOHOSP.NS', 'APOLLOTYRE.NS', 'ASHOKA.NS', 'ASTERDM.NS',
+        'ASTRAL.NS', 'ATUL.NS', 'AUBANK.NS', 'AVANTIFEED.NS', 'BAJAJELEC.NS',
+        'BALKRISIND.NS', 'BALRAMCHIN.NS', 'BANDHANBNK.NS', 'BATAINDIA.NS', 'BBTC.NS',
+        'BCG.NS', 'BDL.NS', 'BEL.NS', 'BEML.NS', 'BHEL.NS',
+        'BHARATFORG.NS', 'BLUEDART.NS', 'BLUESTARCO.NS', 'BOMDYEING.NS', 'BORORENEW.NS',
+        'BRIGADE.NS', 'BSOFT.NS', 'CASTROLIND.NS', 'CCL.NS', 'CEATLTD.NS',
+        'CENTRALBK.NS', 'CENTURYPLY.NS', 'CENTURYTEX.NS', 'CERA.NS', 'CESC.NS',
+        'CHAMBLFERT.NS', 'CHOLAFIN.NS', 'CIPLA.NS', 'COLPAL.NS', 'COROMANDEL.NS',
+        'CRISIL.NS', 'CROMPTON.NS', 'CYIENT.NS', 'DCBBANK.NS', 'DCMSHRIRAM.NS',
+        'DEEPAKNTR.NS', 'DELTACORP.NS', 'DHANUKA.NS', 'DISHTV.NS', 'DIXON.NS',
+        'DLF.NS', 'DRREDDY.NS', 'EDELWEISS.NS', 'EIHOTEL.NS', 'ENDURANCE.NS',
+        'ENGINERSIN.NS', 'EQUITAS.NS', 'ERIS.NS', 'ESCORTS.NS', 'ESSELPACK.NS',
+        'EXIDEIND.NS', 'FDC.NS', 'FEDERALBNK.NS', 'FORTIS.NS', 'FRETAIL.NS',
+        'FSL.NS', 'GAIL.NS', 'GEPIL.NS', 'GILLETTE.NS', 'GLENMARK.NS',
+        'GMMPFAUDLR.NS', 'GMRINFRA.NS', 'GNFC.NS', 'GPPL.NS', 'GRANULES.NS',
+        'GRAPHITE.NS', 'GSFC.NS', 'GSPL.NS', 'GUJGASLTD.NS', 'HATHWAY.NS',
+        'HCL-INSYS.NS', 'HDFCAMC.NS', 'HDFCLIFE.NS', 'HEG.NS', 'HEIDELBERG.NS',
+        'HEROMOTOCO.NS', 'HFCL.NS', 'HINDCOPPER.NS', 'HINDPETRO.NS', 'HINDZINC.NS',
+        'HUDCO.NS', 'IBULHSGFIN.NS', 'ICICIPRULI.NS', 'ICIL.NS', 'IDBI.NS',
+        'IDEA.NS', 'IDFC.NS', 'IDFCFIRSTB.NS', 'IFBIND.NS', 'IGL.NS',
+        'IIFL.NS', 'INDIACEM.NS', 'INDIANB.NS', 'INDIGO.NS', 'INDUSINDBK.NS',
+        'INFIBEAM.NS', 'INFY.NS', 'IOC.NS', 'IPCALAB.NS', 'IRB.NS',
+        'ITC.NS', 'JBCHEPHARM.NS', 'JINDALSTEL.NS', 'JKCEMENT.NS', 'JKLAKSHMI.NS',
+        'JMFINANCIL.NS', 'JSWENERGY.NS', 'JUBLFOOD.NS', 'JUSTDIAL.NS', 'KAJARIACER.NS',
+        'KANSAINER.NS', 'KARURVYSYA.NS', 'KEC.NS', 'KEI.NS', 'KFINTECH.NS',
+        'KOTAKBANK.NS', 'KPITTECH.NS', 'KRBL.NS', 'KSB.NS', 'L&TFH.NS',
+        'LAURUSLABS.NS', 'LEMONTREE.NS', 'LICHSGFIN.NS', 'LINDEINDIA.NS', 'LTTS.NS',
+        'LUPIN.NS', 'M&M.NS', 'M&MFIN.NS', 'MANAPPURAM.NS', 'MARICO.NS',
+        'MARUTI.NS', 'MAXHEALTH.NS', 'MCDOWELL-N.NS', 'MCX.NS', 'METROPOLIS.NS',
+        'MFSL.NS', 'MGL.NS', 'MINDTREE.NS', 'MOTHERSUMI.NS', 'MPHASIS.NS',
+        'MRF.NS', 'MUTHOOTFIN.NS', 'NAM-INDIA.NS', 'NBCC.NS', 'NCC.NS',
+        'NESCO.NS', 'NHPC.NS', 'NIACL.NS', 'NLCINDIA.NS', 'NMDC.NS',
+        'NTPC.NS', 'OBEROIRLTY.NS', 'OFSS.NS', 'OIL.NS', 'ONGC.NS',
+        'PAGEIND.NS', 'PEL.NS', 'PERSISTENT.NS', 'PETRONET.NS', 'PFC.NS',
+        'PFIZER.NS', 'PHOENIXLTD.NS', 'PIDILITIND.NS', 'PIIND.NS', 'PNB.NS',
+        'POLYCAB.NS', 'POWERGRID.NS', 'PRAJIND.NS', 'PRESTIGE.NS', 'PRSMJOHNSN.NS',
+        'PSB.NS', 'PVR.NS', 'RAMCOCEM.NS', 'RBLBANK.NS', 'RECLTD.NS',
+        'RELAXO.NS', 'RELINFRA.NS', 'REPCOHOME.NS', 'RVNL.NS', 'SAIL.NS',
+        'SANOFI.NS', 'SCHAEFFLER.NS', 'SCHNEIDER.NS', 'SHREECEM.NS', 'SIEMENS.NS',
+        'SOBHA.NS', 'SOLARINDS.NS', 'SONATSOFTW.NS', 'SPARC.NS', 'SRF.NS',
+        'SRTRANSFIN.NS', 'STAR.NS', 'SUNPHARMA.NS', 'SUNTV.NS', 'SUPREMEIND.NS',
+        'SUZLON.NS', 'SYNGENE.NS', 'TATACHEM.NS', 'TATACOMM.NS', 'TATACONSUM.NS',
+        'TATAELXSI.NS', 'TATAMOTORS.NS', 'TATAPOWER.NS', 'TATASTEEL.NS', 'TCS.NS',
+        'TECHM.NS', 'THERMAX.NS', 'THYROCARE.NS', 'TITAN.NS', 'TORNTPHARM.NS',
+        'TORNTPOWER.NS', 'TRENT.NS', 'TV18BRDCST.NS', 'TVSMOTOR.NS', 'UBL.NS',
+        'UCOBANK.NS', 'UFLEX.NS', 'ULTRACEMCO.NS', 'UNIONBANK.NS', 'UPL.NS',
+        'VAIBHAVGBL.NS', 'VAKRANGEE.NS', 'VBL.NS', 'VEDL.NS', 'VGUARD.NS',
+        'VIPIND.NS', 'VOLTAS.NS', 'WABCOINDIA.NS', 'WHIRLPOOL.NS', 'WIPRO.NS',
+        'WOCKPHARMA.NS', 'YESBANK.NS', 'ZEEL.NS', 'ZENSARTECH.NS', 'ZYDUSWELL.NS'
+    ],
+    smallcap: [
+        'ABCAPITAL.NS', 'ABFRL.NS', 'ADANIGREEN.NS', 'ADANITRANS.NS', 'AIAENG.NS',
+        'APOLLOHOSP.NS', 'APOLLOTYRE.NS', 'ASHOKA.NS', 'ASTERDM.NS', 'ASTRAL.NS',
+        'ATUL.NS', 'AVANTIFEED.NS', 'BAJAJELEC.NS', 'BALKRISIND.NS', 'BALRAMCHIN.NS',
+        'BANDHANBNK.NS', 'BBTC.NS', 'BCG.NS', 'BDL.NS', 'BEML.NS',
+        'BLUEDART.NS', 'BLUESTARCO.NS', 'BOMDYEING.NS', 'BORORENEW.NS', 'BRIGADE.NS',
+        'BSOFT.NS', 'CASTROLIND.NS', 'CCL.NS', 'CEATLTD.NS', 'CENTRALBK.NS',
+        'CENTURYPLY.NS', 'CENTURYTEX.NS', 'CERA.NS', 'CESC.NS', 'CHAMBLFERT.NS',
+        'COROMANDEL.NS', 'CRISIL.NS', 'CROMPTON.NS', 'CYIENT.NS', 'DCBBANK.NS',
+        'DCMSHRIRAM.NS', 'DEEPAKNTR.NS', 'DELTACORP.NS', 'DHANUKA.NS', 'DISHTV.NS',
+        'DIXON.NS', 'EDELWEISS.NS', 'EIHOTEL.NS', 'ENDURANCE.NS', 'ENGINERSIN.NS',
+        'EQUITAS.NS', 'ERIS.NS', 'ESSELPACK.NS', 'FDC.NS', 'FORTIS.NS',
+        'FRETAIL.NS', 'FSL.NS', 'GEPIL.NS', 'GILLETTE.NS', 'GMMPFAUDLR.NS',
+        'GMRINFRA.NS', 'GNFC.NS', 'GPPL.NS', 'GRANULES.NS', 'GRAPHITE.NS',
+        'GSFC.NS', 'GSPL.NS', 'GUJGASLTD.NS', 'HATHWAY.NS', 'HCL-INSYS.NS',
+        'HDFCAMC.NS', 'HEG.NS', 'HEIDELBERG.NS', 'HFCL.NS', 'HINDCOPPER.NS',
+        'HINDZINC.NS', 'HUDCO.NS', 'IBULHSGFIN.NS', 'ICIL.NS', 'IDBI.NS',
+        'IFBIND.NS', 'IIFL.NS', 'INDIACEM.NS', 'INFIBEAM.NS', 'IPCALAB.NS',
+        'IRB.NS', 'JBCHEPHARM.NS', 'JKCEMENT.NS', 'JKLAKSHMI.NS', 'JMFINANCIL.NS',
+        'JSWENERGY.NS', 'JUSTDIAL.NS', 'KAJARIACER.NS', 'KANSAINER.NS', 'KARURVYSYA.NS',
+        'KEC.NS', 'KEI.NS', 'KFINTECH.NS', 'KPITTECH.NS', 'KRBL.NS',
+        'KSB.NS', 'LAURUSLABS.NS', 'LEMONTREE.NS', 'LICHSGFIN.NS', 'LINDEINDIA.NS',
+        'LTTS.NS', 'MAXHEALTH.NS', 'MCDOWELL-N.NS', 'MCX.NS', 'METROPOLIS.NS',
+        'MFSL.NS', 'MINDTREE.NS', 'MOTHERSUMI.NS', 'MPHASIS.NS', 'NAM-INDIA.NS',
+        'NBCC.NS', 'NCC.NS', 'NESCO.NS', 'NHPC.NS', 'NIACL.NS',
+        'NLCINDIA.NS', 'OBEROIRLTY.NS', 'PERSISTENT.NS', 'PFIZER.NS', 'PHOENIXLTD.NS',
+        'PIIND.NS', 'POLYCAB.NS', 'PRAJIND.NS', 'PRESTIGE.NS', 'PRSMJOHNSN.NS',
+        'PSB.NS', 'RAMCOCEM.NS', 'RELAXO.NS', 'RELINFRA.NS', 'REPCOHOME.NS',
+        'RVNL.NS', 'SANOFI.NS', 'SCHAEFFLER.NS', 'SCHNEIDER.NS', 'SOBHA.NS',
+        'SOLARINDS.NS', 'SONATSOFTW.NS', 'SPARC.NS', 'STAR.NS', 'SUPREMEIND.NS',
+        'SUZLON.NS', 'SYNGENE.NS', 'TATAELXSI.NS', 'THERMAX.NS', 'THYROCARE.NS',
+        'TORNTPOWER.NS', 'TRENT.NS', 'TV18BRDCST.NS', 'UCOBANK.NS', 'UFLEX.NS',
+        'UNIONBANK.NS', 'VAIBHAVGBL.NS', 'VAKRANGEE.NS', 'VBL.NS', 'VGUARD.NS',
+        'VIPIND.NS', 'WABCOINDIA.NS', 'WHIRLPOOL.NS', 'ZENSARTECH.NS', 'ZYDUSWELL.NS'
+    ]
+};
+document.addEventListener('DOMContentLoaded', function() {
+    // Set current time
+    const now = new Date();
+    document.getElementById('current-time').textContent = now.toLocaleTimeString();
+    
+    // Available indicators
+    const indicators = [
+        { name: "Close", value: "close" },
+        { name: "Open", value: "open" },
+        { name: "High", value: "high" },
+        { name: "Low", value: "low" },
+        { name: "Volume", value: "volume" },
+        { name: "RSI(14)", value: "rsi14" },
+        { name: "EMA(9)", value: "ema9" },
+        { name: "EMA(20)", value: "ema20" },
+        { name: "EMA(50)", value: "ema50" },
+        { name: "EMA(200)", value: "ema200" },
+        { name: "SMA(20)", value: "sma20" },
+        { name: "MACD Line", value: "macd_line" },
+        { name: "MACD Signal", value: "macd_signal" },
+        { name: "MACD Histogram", value: "macd_hist" },
+        { name: "Bollinger Upper", value: "bb_upper" },
+        { name: "Bollinger Middle", value: "bb_middle" },
+        { name: "Bollinger Lower", value: "bb_lower" },
+        { name: "SuperTrend", value: "supertrend" },
+        { name: "VWAP", value: "vwap" }
+    ];
+    
+    // Comparison operators
+    const operators = [
+        { name: ">", value: ">" },
+        { name: "<", value: "<" },
+        { name: ">=", value: ">=" },
+        { name: "<=", value: "<=" },
+        { name: "==", value: "==" },
+        { name: "!=", value: "!=" },
+        { name: "Crossed Above", value: "crossed_above" },
+        { name: "Crossed Below", value: "crossed_below" }
+    ];
+    
+    // Arithmetic operators (for calculations)
+    const arithmeticOperators = [
+        { name: "+", value: "+" },
+        { name: "-", value: "-" },
+        { name: "*", value: "*" },
+        { name: "/", value: "/" }
+    ];
+    
+    // Add condition row
+    let conditionCount = 0;
+    document.getElementById('add-condition').addEventListener('click', function() {
+        addConditionRow();
+    });
+    
+    function addConditionRow() {
+        const wrapper = document.getElementById('conditions-wrapper');
+        const conditionId = 'condition-' + conditionCount;
+        
+        // Add logical operator if not first condition
+        if (conditionCount > 0) {
+            const logicalOpDiv = document.createElement('div');
+            logicalOpDiv.className = 'logical-operator-container';
+            logicalOpDiv.innerHTML = `
+                <select class="logical-operator">
+                    <option value="AND">AND</option>
+                    <option value="OR">OR</option>
+                </select>
+            `;
+            wrapper.appendChild(logicalOpDiv);
+        }
+        
+        // Create condition row
+        const conditionDiv = document.createElement('div');
+        conditionDiv.className = 'condition-row';
+        conditionDiv.id = conditionId;
+        
+        // Left operand (indicator)
+        const leftOperandSelect = document.createElement('select');
+        leftOperandSelect.className = 'indicator-select left-operand';
+        indicators.forEach(ind => {
+            leftOperandSelect.innerHTML += `<option value="${ind.value}">${ind.name}</option>`;
+        });
+        
+        // Operator
+        const operatorSelect = document.createElement('select');
+        operatorSelect.className = 'operator-select';
+        operators.forEach(op => {
+            operatorSelect.innerHTML += `<option value="${op.value}">${op.name}</option>`;
+        });
+        
+        // Right operand (can be indicator or value)
+        const rightOperandTypeSelect = document.createElement('select');
+        rightOperandTypeSelect.className = 'right-operand-type';
+        rightOperandTypeSelect.innerHTML = `
+            <option value="value">Value</option>
+            <option value="indicator">Indicator</option>
+            <option value="calculation">Calculation</option>
+        `;
+        
+        const rightOperandValue = document.createElement('input');
+        rightOperandValue.type = 'number';
+        rightOperandValue.className = 'value-input right-operand-value';
+        rightOperandValue.placeholder = 'Value';
+        rightOperandValue.step = '0.01';
+        
+        const rightOperandIndicator = document.createElement('select');
+        rightOperandIndicator.className = 'indicator-select right-operand-indicator';
+        rightOperandIndicator.style.display = 'none';
+        indicators.forEach(ind => {
+            rightOperandIndicator.innerHTML += `<option value="${ind.value}">${ind.name}</option>`;
+        });
+        
+        // Calculation fields (hidden by default)
+        const calculationWrapper = document.createElement('div');
+        calculationWrapper.className = 'calculation-wrapper';
+        calculationWrapper.style.display = 'none';
+        
+        const calcOperand1Type = document.createElement('select');
+        calcOperand1Type.className = 'calc-operand-type';
+        calcOperand1Type.innerHTML = `
+            <option value="value">Value</option>
+            <option value="indicator">Indicator</option>
+        `;
+        
+        const calcOperand1Value = document.createElement('input');
+        calcOperand1Value.type = 'number';
+        calcOperand1Value.className = 'calc-value-input';
+        calcOperand1Value.placeholder = 'Value';
+        calcOperand1Value.step = '0.01';
+        
+        const calcOperand1Indicator = document.createElement('select');
+        calcOperand1Indicator.className = 'calc-indicator-select';
+        calcOperand1Indicator.style.display = 'none';
+        indicators.forEach(ind => {
+            calcOperand1Indicator.innerHTML += `<option value="${ind.value}">${ind.name}</option>`;
+        });
+        
+        const calcOperator = document.createElement('select');
+        calcOperator.className = 'calc-operator';
+        arithmeticOperators.forEach(op => {
+            calcOperator.innerHTML += `<option value="${op.value}">${op.name}</option>`;
+        });
+        
+        const calcOperand2Type = document.createElement('select');
+        calcOperand2Type.className = 'calc-operand-type';
+        calcOperand2Type.innerHTML = `
+            <option value="value">Value</option>
+            <option value="indicator">Indicator</option>
+        `;
+        
+        const calcOperand2Value = document.createElement('input');
+        calcOperand2Value.type = 'number';
+        calcOperand2Value.className = 'calc-value-input';
+        calcOperand2Value.placeholder = 'Value';
+        calcOperand2Value.step = '0.01';
+        
+        const calcOperand2Indicator = document.createElement('select');
+        calcOperand2Indicator.className = 'calc-indicator-select';
+        calcOperand2Indicator.style.display = 'none';
+        indicators.forEach(ind => {
+            calcOperand2Indicator.innerHTML += `<option value="${ind.value}">${ind.name}</option>`;
+        });
+        
+        calculationWrapper.appendChild(calcOperand1Type);
+        calculationWrapper.appendChild(calcOperand1Value);
+        calculationWrapper.appendChild(calcOperand1Indicator);
+        calculationWrapper.appendChild(calcOperator);
+        calculationWrapper.appendChild(calcOperand2Type);
+        calculationWrapper.appendChild(calcOperand2Value);
+        calculationWrapper.appendChild(calcOperand2Indicator);
+        
+        // Right operand container
+        const rightOperandContainer = document.createElement('div');
+        rightOperandContainer.className = 'right-operand-container';
+        rightOperandContainer.appendChild(rightOperandValue);
+        rightOperandContainer.appendChild(rightOperandIndicator);
+        rightOperandContainer.appendChild(calculationWrapper);
+        
+        // Remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-condition-btn';
+        removeBtn.innerHTML = '×';
+        removeBtn.addEventListener('click', function() {
+            removeCondition(conditionId);
+        });
+        
+        // Build condition row
+        conditionDiv.appendChild(leftOperandSelect);
+        conditionDiv.appendChild(operatorSelect);
+        conditionDiv.appendChild(rightOperandTypeSelect);
+        conditionDiv.appendChild(rightOperandContainer);
+        conditionDiv.appendChild(removeBtn);
+        
+        wrapper.appendChild(conditionDiv);
+        
+        // Add event listener for right operand type change
+        rightOperandTypeSelect.addEventListener('change', function() {
+            const value = this.value;
+            rightOperandValue.style.display = value === 'value' ? 'block' : 'none';
+            rightOperandIndicator.style.display = value === 'indicator' ? 'block' : 'none';
+            calculationWrapper.style.display = value === 'calculation' ? 'flex' : 'none';
+        });
+        
+        // Add event listeners for calculation operand type changes
+        calcOperand1Type.addEventListener('change', function() {
+            const value = this.value;
+            calcOperand1Value.style.display = value === 'value' ? 'block' : 'none';
+            calcOperand1Indicator.style.display = value === 'indicator' ? 'block' : 'none';
+        });
+        
+        calcOperand2Type.addEventListener('change', function() {
+            const value = this.value;
+            calcOperand2Value.style.display = value === 'value' ? 'block' : 'none';
+            calcOperand2Indicator.style.display = value === 'indicator' ? 'block' : 'none';
+        });
+        
+        conditionCount++;
+    }
+    
+    function removeCondition(conditionId) {
+        const wrapper = document.getElementById('conditions-wrapper');
+        const conditionDiv = document.getElementById(conditionId);
+        const prevElement = conditionDiv.previousElementSibling;
+        
+        // Remove the condition and its logical operator if it exists
+        if (prevElement && prevElement.classList.contains('logical-operator-container')) {
+            wrapper.removeChild(prevElement);
+        }
+        wrapper.removeChild(conditionDiv);
+        
+        // Update condition numbering if needed
+        conditionCount--;
+    }
+    
+    // Save scan strategy
+    document.getElementById('save-scan').addEventListener('click', function() {
+        const strategyName = document.getElementById('strategy-name').value.trim();
+        const timeframe = document.getElementById('timeframe').value;
+        const segment = document.getElementById('segment').value;
+        const strategyType = document.getElementById('strategy-type').value;
+        
+        if (!strategyName) {
+            alert('Please enter a name for your strategy');
+            return;
+        }
+        
+        const conditions = collectConditions();
+        if (conditions.length === 0) {
+            alert('Please add at least one condition');
+            return;
+        }
+        
+        // In a real app, you would save this to your backend/database
+        const strategy = {
+            name: strategyName,
+            timeframe: timeframe,
+            segment: segment,
+            type: strategyType,
+            conditions: conditions,
+            createdAt: new Date().toISOString()
+        };
+        
+        // For demo, we'll save to localStorage
+        let savedStrategies = JSON.parse(localStorage.getItem('savedStrategies') || '[]');
+        savedStrategies.push(strategy);
+        localStorage.setItem('savedStrategies', JSON.stringify(savedStrategies));
+        
+        alert(`Strategy "${strategyName}" saved successfully!`);
+        showSavedStrategies();
+    });
+    
+    // Test scan strategy
+    document.getElementById('test-scan').addEventListener('click', function() {
+        const conditions = collectConditions();
+        if (conditions.length === 0) {
+            alert('Please add at least one condition');
+            return;
+        }
+        
+        alert('Testing strategy with conditions:\n\n' + 
+              JSON.stringify(conditions, null, 2));
+    });
+    
+    // Run scan
+    document.getElementById('run-scan').addEventListener('click', async function() {
+        const conditions = collectConditions();
+        if (conditions.length === 0) {
+            alert('Please add at least one condition');
+            return;
+        }
+        
+        const timeframe = document.getElementById('timeframe').value;
+        const segment = document.getElementById('segment').value;
+        const strategyType = document.getElementById('strategy-type').value;
+        
+        // Show loading state
+        const runBtn = document.getElementById('run-scan');
+        runBtn.textContent = 'Running...';
+        runBtn.disabled = true;
+        
+        // Show progress bar
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
+        
+        try {
+            // Get stocks for selected segment
+            const stocks = STOCK_LISTS[segment] || STOCK_LISTS['nifty50'];
+            const totalStocks = stocks.length;
+            let processed = 0;
+            let results = [];
+            
+            // Process stocks in batches to prevent UI freezing
+            const BATCH_SIZE = 10;
+            for (let i = 0; i < stocks.length; i += BATCH_SIZE) {
+                const batch = stocks.slice(i, i + BATCH_SIZE);
+                
+                // Send scan request for this batch
+                const response = await fetch('/api/run_scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        stocks: batch,
+                        timeframe: timeframe,
+                        conditions: conditions,
+                        strategyType: strategyType
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Batch scan failed: ' + response.statusText);
+                }
+                
+                const batchResults = await response.json();
+                results = results.concat(batchResults);
+                
+                // Update progress
+                processed += batch.length;
+                const progress = Math.round((processed / totalStocks) * 100);
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress + '%';
+                
+                // Small delay to allow UI to update
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            displayResults(results);
+            
+        } catch (error) {
+            console.error('Scan error:', error);
+            alert('Scan failed: ' + error.message);
+        } finally {
+            runBtn.textContent = 'Run Scan';
+            runBtn.disabled = false;
+            progressContainer.style.display = 'none';
+        }
+    });
+    
+    // Collect all conditions from the form
+    function collectConditions() {
+        const conditions = [];
+        const conditionRows = document.querySelectorAll('.condition-row');
+        const logicalOperators = document.querySelectorAll('.logical-operator');
+        
+        conditionRows.forEach((row, index) => {
+            const leftOperand = row.querySelector('.left-operand').value;
+            const operator = row.querySelector('.operator-select').value;
+            const rightOperandType = row.querySelector('.right-operand-type').value;
+            
+            let rightOperand = null;
+            let calculation = null;
+            
+            if (rightOperandType === 'value') {
+                rightOperand = parseFloat(row.querySelector('.right-operand-value').value);
+            } else if (rightOperandType === 'indicator') {
+                rightOperand = row.querySelector('.right-operand-indicator').value;
+            } else if (rightOperandType === 'calculation') {
+                const calcWrapper = row.querySelector('.calculation-wrapper');
+                const op1Type = calcWrapper.querySelector('.calc-operand-type').value;
+                const op1 = op1Type === 'value' ? 
+                    parseFloat(calcWrapper.querySelector('.calc-value-input').value) : 
+                    calcWrapper.querySelector('.calc-indicator-select').value;
+                
+                const calcOperator = calcWrapper.querySelector('.calc-operator').value;
+                
+                const op2Type = calcWrapper.querySelectorAll('.calc-operand-type')[1].value;
+                const op2 = op2Type === 'value' ? 
+                    parseFloat(calcWrapper.querySelectorAll('.calc-value-input')[1].value) : 
+                    calcWrapper.querySelectorAll('.calc-indicator-select')[1].value;
+                
+                calculation = {
+                    operand1: op1,
+                    operator: calcOperator,
+                    operand2: op2
+                };
+            }
+            
+            const condition = {
+                leftOperand: leftOperand,
+                operator: operator,
+                rightOperandType: rightOperandType,
+                rightOperand: rightOperand,
+                calculation: calculation
+            };
+            
+            if (index > 0) {
+                condition.logicalOperator = logicalOperators[index - 1].value;
+            }
+            
+            conditions.push(condition);
+        });
+        
+        return conditions;
+    }
+    
+    // Display results in the table
+    function displayResults(stocks) {
+        const resultsBody = document.getElementById('results-body');
+        resultsBody.innerHTML = '';
+        
+        if (stocks.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="7" style="text-align: center;">No stocks matching your criteria</td>';
+            resultsBody.appendChild(row);
+            document.getElementById('scan-results').style.display = 'table';
+            return;
+        }
+        
+        // Determine which columns to show based on used indicators
+        const usedIndicators = new Set();
+        document.querySelectorAll('.indicator-select').forEach(select => {
+            usedIndicators.add(select.value);
+        });
+        
+        // Create table header based on used indicators
+        const thead = document.querySelector('#scan-results thead');
+        thead.innerHTML = `
+            <tr>
+                <th>Stock</th>
+                ${usedIndicators.has('close') ? '<th>Price</th>' : ''}
+                ${usedIndicators.has('rsi14') ? '<th>RSI(14)</th>' : ''}
+                ${usedIndicators.has('ema20') ? '<th>EMA(20)</th>' : ''}
+                ${usedIndicators.has('ema9') ? '<th>EMA(9)</th>' : ''}
+                ${usedIndicators.has('volume') ? '<th>Volume</th>' : ''}
+                <th>Action</th>
+            </tr>
+        `;
+        
+        // Populate results
+        stocks.forEach(stock => {
+            const row = document.createElement('tr');
+            let rowHTML = `<td>${stock.symbol}</td>`;
+            
+            if (usedIndicators.has('close')) rowHTML += `<td>${stock.close.toFixed(2)}</td>`;
+            if (usedIndicators.has('rsi14')) rowHTML += `<td>${stock.rsi?.toFixed(2) || '-'}</td>`;
+            if (usedIndicators.has('ema20')) rowHTML += `<td>${stock.ema20?.toFixed(2) || '-'}</td>`;
+            if (usedIndicators.has('ema9')) rowHTML += `<td>${stock.ema9?.toFixed(2) || '-'}</td>`;
+            if (usedIndicators.has('volume')) rowHTML += `<td>${stock.volume?.toLocaleString() || '-'}</td>`;
+            
+            rowHTML += `<td><a href="/screener?symbol=${stock.symbol}" target="_blank">View</a></td>`;
+            row.innerHTML = rowHTML;
+            resultsBody.appendChild(row);
+        });
+        
+        document.getElementById('scan-results').style.display = 'table';
+    }
+    
+    // Show saved strategies
+    function showSavedStrategies() {
+        const savedStrategies = JSON.parse(localStorage.getItem('savedStrategies') || '[]');
+        const strategyList = document.getElementById('strategy-list');
+        
+        if (savedStrategies.length === 0) {
+            document.getElementById('saved-strategies').style.display = 'none';
+            return;
+        }
+        
+        strategyList.innerHTML = '';
+        savedStrategies.forEach((strategy, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${strategy.name} (${strategy.timeframe}, ${strategy.type})</span>
+                <div class="strategy-actions">
+                    <a href="#" class="load-strategy" data-index="${index}">Load</a>
+                    <a href="#" class="run-strategy" data-index="${index}">Run</a>
+                    <a href="#" class="delete-strategy" data-index="${index}">Delete</a>
+                </div>
+            `;
+            strategyList.appendChild(li);
+        });
+        
+        // Add event listeners for strategy actions
+        document.querySelectorAll('.load-strategy').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                loadStrategy(parseInt(this.getAttribute('data-index')));
+            });
+        });
+        
+        document.querySelectorAll('.run-strategy').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                runStrategy(parseInt(this.getAttribute('data-index')));
+            });
+        });
+        
+        document.querySelectorAll('.delete-strategy').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                deleteStrategy(parseInt(this.getAttribute('data-index')));
+            });
+        });
+        
+        document.getElementById('saved-strategies').style.display = 'block';
+    }
+    
+    // Load a saved strategy
+    function loadStrategy(index) {
+        const savedStrategies = JSON.parse(localStorage.getItem('savedStrategies') || '[]');
+        if (index >= savedStrategies.length) return;
+        
+        const strategy = savedStrategies[index];
+        
+        // Set basic info
+        document.getElementById('strategy-name').value = strategy.name;
+        document.getElementById('timeframe').value = strategy.timeframe;
+        document.getElementById('segment').value = strategy.segment;
+        document.getElementById('strategy-type').value = strategy.type;
+        
+        // Clear existing conditions
+        document.getElementById('conditions-wrapper').innerHTML = '';
+        conditionCount = 0;
+        
+        // Add conditions
+        strategy.conditions.forEach((condition, i) => {
+            if (i > 0) {
+                // Add logical operator
+                const wrapper = document.getElementById('conditions-wrapper');
+                const logicalOpDiv = document.createElement('div');
+                logicalOpDiv.className = 'logical-operator-container';
+                logicalOpDiv.innerHTML = `
+                    <select class="logical-operator">
+                        <option value="AND">AND</option>
+                        <option value="OR">OR</option>
+                    </select>
+                `;
+                wrapper.appendChild(logicalOpDiv);
+                
+                // Set logical operator value
+                const select = wrapper.lastElementChild.querySelector('.logical-operator');
+                select.value = condition.logicalOperator || 'AND';
+            }
+            
+            addConditionRow();
+            
+            // Get the newly added condition row
+            const conditionId = 'condition-' + (conditionCount - 1);
+            const conditionDiv = document.getElementById(conditionId);
+            
+            // Set left operand
+            conditionDiv.querySelector('.left-operand').value = condition.leftOperand;
+            
+            // Set operator
+            conditionDiv.querySelector('.operator-select').value = condition.operator;
+            
+            // Set right operand type and value
+            const rightOperandTypeSelect = conditionDiv.querySelector('.right-operand-type');
+            rightOperandTypeSelect.value = condition.rightOperandType;
+            
+            // Trigger change event to show the correct right operand input
+            rightOperandTypeSelect.dispatchEvent(new Event('change'));
+            
+            if (condition.rightOperandType === 'value') {
+                conditionDiv.querySelector('.right-operand-value').value = condition.rightOperand;
+            } else if (condition.rightOperandType === 'indicator') {
+                conditionDiv.querySelector('.right-operand-indicator').value = condition.rightOperand;
+            } else if (condition.rightOperandType === 'calculation') {
+                const calc = condition.calculation;
+                const calcWrapper = conditionDiv.querySelector('.calculation-wrapper');
+                
+                // Set operand 1
+                if (typeof calc.operand1 === 'number') {
+                    calcWrapper.querySelector('.calc-operand-type').value = 'value';
+                    calcWrapper.querySelector('.calc-value-input').value = calc.operand1;
+                } else {
+                    calcWrapper.querySelector('.calc-operand-type').value = 'indicator';
+                    calcWrapper.querySelector('.calc-indicator-select').value = calc.operand1;
+                }
+                
+                // Set operator
+                calcWrapper.querySelector('.calc-operator').value = calc.operator;
+                
+                // Set operand 2
+                if (typeof calc.operand2 === 'number') {
+                    calcWrapper.querySelectorAll('.calc-operand-type')[1].value = 'value';
+                    calcWrapper.querySelectorAll('.calc-value-input')[1].value = calc.operand2;
+                } else {
+                    calcWrapper.querySelectorAll('.calc-operand-type')[1].value = 'indicator';
+                    calcWrapper.querySelectorAll('.calc-indicator-select')[1].value = calc.operand2;
+                }
+                
+                // Trigger change events for calculation operands
+                calcWrapper.querySelector('.calc-operand-type').dispatchEvent(new Event('change'));
+                calcWrapper.querySelectorAll('.calc-operand-type')[1].dispatchEvent(new Event('change'));
+            }
+        });
+        
+        alert(`Strategy "${strategy.name}" loaded!`);
+    }
+    
+   
+    
+    // Run a saved strategy
+    function runStrategy(index) {
+        loadStrategy(index);
+        document.getElementById('run-scan').click();
+    }
+    
+    // Delete a saved strategy
+    function deleteStrategy(index) {
+        if (!confirm('Are you sure you want to delete this strategy?')) return;
+        
+        const savedStrategies = JSON.parse(localStorage.getItem('savedStrategies') || '[]');
+        if (index >= savedStrategies.length) return;
+        
+        savedStrategies.splice(index, 1);
+        localStorage.setItem('savedStrategies', JSON.stringify(savedStrategies));
+        
+        showSavedStrategies();
+    }
+    
+    // Initialize by showing saved strategies if any
+    showSavedStrategies();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Screener - {% block title %}{% endblock %}</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            background-color: #333;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .navbar a:hover {
+            background-color: #555;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            flex: 1;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: auto;
+        }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+  
+<div class="navbar">
+    <a href="/">Home</a>
+    <a href="/screener">Screener</a>
+    <a href="/waiting_list">Waiting List</a>
+    <a href="/live_screener">Live Screener</a>
+    <a href="/manage_stocks">Manage Stocks</a>
+<a href="/create_scan">Create Scan</a>
+    <a href="/contact">Contact</a>
+</div>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        &copy; 2025 Stock Screener. All rights reserved. | Data provided by Yahoo Finance
+    </footer>
+</body>
+</html>

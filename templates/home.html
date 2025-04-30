@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    .main-content {
+        padding: 50px 20px;
+        flex: 1;
+    }
+    h1 {
+        color: #2c3e50;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    h2 {
+        color: #3498db;
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+    }
+    .tagline {
+        color: #7f8c8d;
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+    }
+    .date-display {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 30px;
+    }
+    .screener-button {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 1.1rem;
+        transition: background-color 0.3s;
+        margin-bottom: 40px;
+    }
+    .screener-button:hover {
+        background-color: #2980b9;
+    }
+    .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 20px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <h1>Welcome to Telugu community  Stock Screener</h1>
+    <h2>Screener</h2>
+    <p class="tagline">Your one-stop solution for real-time stock screening.</p>
+    
+    <div class="date-display">
+        Today's date: <span id="current-date"></span>
+    </div>
+    
+    <a href="/screener" class="screener-button">Go to Screener</a>
+</div>
+
+<div class="footer">
+    © 2025 Your Stock Screener. All rights reserved.
+</div>
+
+<script>
+    // Display current date
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('current-date').textContent = now.toLocaleDateString(undefined, options);
+</script>
+{% endblock %}
